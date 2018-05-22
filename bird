@@ -1,0 +1,104 @@
+//I am by no means a bird expert
+//offset world
+push
+move 250 250 0
+rotate x 10
+rotate y 60
+//branch
+push
+move 0 -150 0
+scale 20 1 1
+sphere 0 0 0 30
+pop
+//body
+push
+rotate x -7
+push
+scale 1 1 1.5
+sphere 0 0 0 90
+pop
+//head
+push
+move 0 90 100
+sphere 0 0 0 45
+//beak
+push
+move 0 0 45
+push
+rotate x 5
+scale 1 .5 4
+sphere 0 0 0 10
+pop
+scale 1 .5 4
+sphere 0 -7 0 10
+pop
+pop
+//wings
+push
+push
+move -60 50 -40
+rotate z -10
+rotate x -5
+rotate z 60
+scale 1 .3 3.3
+sphere 0 0 0 30
+pop
+push
+move 60 50 -40
+rotate z 10
+rotate x -5
+rotate z -60
+scale 1 .3 3.3
+sphere 0 0 0 30
+pop
+pop
+//tail
+push
+move 0 0 -90
+push
+scale 1 1 13
+sphere 0 0 0 15
+pop
+push
+move 0 2 0
+rotate x -1
+scale 1 1 13
+sphere 0 0 0 15
+pop
+move 0 4 0
+rotate x -2
+scale 1 1 13
+sphere 0 0 0 15
+pop
+//foot1
+push
+move -62 -65 -50
+push
+rotate z -15
+rotate x -38
+scale 1 9 1
+sphere 0 0 0 7
+pop
+//toe1
+move -17 -55 55
+rotate x 13
+scale 1 1 3
+sphere 0 0 0 7
+pop
+//foot2
+push
+move 62 -65 -50
+push
+rotate z 15
+rotate x -38
+scale 1 9 1
+sphere 0 0 0 7
+pop
+//toe2
+move 17 -55 55
+rotate x 13
+scale 1 1 3
+sphere 0 0 0 7
+pop
+display
+save bird.png
