@@ -65,3 +65,7 @@
   (run-program "display" (list "-")
                :input (make-string-input-stream (screen-to-destination nil))
                :wait wait :search t))
+
+(defun save-frame (basename frame-num)
+  "Saves a frame with BASENAME and FRAMENUM."
+  (save ))
