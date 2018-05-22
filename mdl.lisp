@@ -21,12 +21,20 @@
                                         x))
     (t (error "~a does not indicate a token." str))))
 
-(defun compile-mdl (file)
-  "Compiles FILE to an image."
+(defmacro add-op (&body body)
+  "Adds an operation to the operation list. BODY is the body of the lambda."
+  `(push (lambda () ,@body) ops))
+
+(defmacro with-knob ((var sym) &body body)
+  "Lets VAR be the value of SYM in the symbol table."
+  `(let ((,var (gethash ,sym symbol-table 1)))
+     ,@body))
+
+(defun parse-mdl (token-list)
+  "Parses TOKEN-LIST following the mdl grammar. Returns the relevant data as a values."
   (let ((stack (list (make-transform-matrix)))
         (edges (make-matrix))
-        (polygons (make-matrix))
-        
+        (polygons (make-matrix)) 
         basename
         frames
         (symbol-table (make-hash-table :test #'equal))
@@ -42,106 +50,104 @@
                (clear-matrix polygons))
              (update-current-stack (transform)
                (push (matrix-multiply (pop stack) transform) stack)))
-      (macrolet ((add-op (&body body)
-                   `(push (lambda ()
-                            ,@body)
-                          ops))
-                 (with-knob ((var sym) &body body)
-                   `(let ((,var (gethash ,sym symbol-table 1)))
-                      ,@body)))
-        (do ((token-list (lexify file #'classifier)))
-            ((not token-list))
-          (parse token-list
-            (push
-             (add-op
-              (push (copy-matrix (car stack)) stack)))
-            (pop
-             (add-op
-              (pop stack)))
+      (do ()
+          ((not token-list))
+        (parse token-list
+          (push
+           (add-op
+             (push (copy-matrix (car stack)) stack)))
+          (pop
+           (add-op
+             (pop stack)))
 
-            ((move number number number (&opt symbol))
-             (add-op (with-knob (v a4)
-                       (update-current-stack (make-translate (* a1 v)
-                                                             (* a2 v)
-                                                             (* a3 v))))))
-            ((scale number number number (&opt symbol))
-             (add-op (with-knob (v a4)
-                       (update-current-stack (make-scale (* a1 v)
-                                                         (* a2 v)
-                                                         (* a3 v))))))
-            ((rotate symbol number (&opt symbol))
-             (add-op (with-knob (v a3)
-                       (update-current-stack (make-rotate (concat-symbol a1)
-                                                          (* a2 v))))))
+          ((move number number number (&opt symbol))
+           (add-op (with-knob (v a4)
+                     (update-current-stack (make-translate (* a1 v)
+                                                           (* a2 v)
+                                                           (* a3 v))))))
+          ((scale number number number (&opt symbol))
+           (add-op (with-knob (v a4)
+                     (update-current-stack (make-scale (* a1 v)
+                                                       (* a2 v)
+                                                       (* a3 v))))))
+          ((rotate symbol number (&opt symbol))
+           (add-op (with-knob (v a3)
+                     (update-current-stack (make-rotate (concat-symbol a1)
+                                                        (* a2 v))))))
 
-            ((sphere (&opt symbol) number number number number (&opt symbol))
-             (add-op
-              (add-sphere polygons 10 a2 a3 a4 a5)
-              (post-add-polygons)))
-            ((torus (&opt symbol) number number number number number (&opt symbol))
-             (add-op
-              (add-torus polygons 10 a2 a3 a4 a5 a6)
-              (post-add-polygons)))
-            ((box (&opt symbol) number number number number number number (&opt symbol))
-             (add-op
-              (add-box polygons a2 a3 a4 a5 a6 a7)
-              (post-add-polygons)))
-            ((line (&opt symbol) number number number (&opt symbol) number number number (&opt symbol))
-             (add-op
-              (add-edge edges a2 a3 a4 a6 a7 a8)
-              (post-add-lines)))
-            ((mesh (&opt symbol) colon (&opt symbol)))
+          ((sphere (&opt symbol) number number number number (&opt symbol))
+           (add-op
+             (add-sphere polygons 10 a2 a3 a4 a5)
+             (post-add-polygons)))
+          ((torus (&opt symbol) number number number number number (&opt symbol))
+           (add-op
+             (add-torus polygons 10 a2 a3 a4 a5 a6)
+             (post-add-polygons)))
+          ((box (&opt symbol) number number number number number number (&opt symbol))
+           (add-op
+             (add-box polygons a2 a3 a4 a5 a6 a7)
+             (post-add-polygons)))
+          ((line (&opt symbol) number number number (&opt symbol) number number number (&opt symbol))
+           (add-op
+             (add-edge edges a2 a3 a4 a6 a7 a8)
+             (post-add-lines)))
+          ((mesh (&opt symbol) colon (&opt symbol)))
 
-            ((basename symbol)
-             (setf basename a1))
-            ((set symbol number))
-            ((save_knobs symbol))
-            ((tween number number symbol symbol))
-            ((frames number)
-             (setf frames a1))
-            ((vary symbol number number number number)
-             (push (lambda (frame)
-                     (cond
-                       ((= frame a2)
-                        (setf (gethash a1 symbol-table)
-                              a4))
-                       ((<= a2 frame a3)
-                        (incf (gethash a1 symbol-table) (/ (- a5 a4) (- a3 a2))))))
-                   knob-ops))
-            ((setknobs number))
+          ((basename symbol)
+           (setf basename a1))
+          ((set symbol number))
+          ((save_knobs symbol))
+          ((tween number number symbol symbol))
+          ((frames number)
+           (setf frames a1))
+          ((vary symbol number number number number)
+           (push (lambda (frame)
+                   (cond
+                     ((= frame a2)
+                      (setf (gethash a1 symbol-table)
+                            a4))
+                     ((<= a2 frame a3)
+                      (incf (gethash a1 symbol-table) (/ (- a5 a4) (- a3 a2))))))
+                 knob-ops))
+          ((setknobs number))
 
-            ((light symbol number number number number number number))
-            ((ambient number number number))
-            ((constants symbol number number number number number number number number number (&opt number) (&opt number) (&opt number)))
-            ((shading symbol))
+          ((light symbol number number number number number number))
+          ((ambient number number number))
+          ((constants symbol number number number number number number number number number (&opt number) (&opt number) (&opt number)))
+          ((shading symbol))
 
-            ((save_coord_system symbol))
-            ((camera number number number number number number))
-            ((save symbol)
-             (add-op
-              (save a1)))
-            (generate_rayfiles)
-            ((focal number))
-            (display
-             (add-op
-              (display t)))))))
-    (setf ops (nreverse ops)
-          knob-ops (nreverse knob-ops))
+          ((save_coord_system symbol))
+          ((camera number number number number number number))
+          ((save symbol)
+           (add-op
+             (save a1)))
+          (generate_rayfiles)
+          ((focal number))
+          (display
+           (add-op
+             (display t))))))
+    (values basename frames symbol-table (nreverse knob-ops) (nreverse ops)
+            (lambda () (setf stack (list (make-transform-matrix)))))))
+
+(defun compile-mdl (file)
+  "Compiles FILE to an image."
+  (multiple-value-bind (basename frames symbol-table knob-ops ops clear-stack)
+      (parse-mdl (lexify file #'classifier))
     (cond
       (frames
-       (do ((frame 0 (1+ frame))
-            (frames-digs (integer-digits (1- frames))))
-           ((>= frame frames))
-         (dolist (op knob-ops)
-           (funcall op frame))
-         (loop for key being the hash-key in symbol-table
-               and val being the hash-value in symbol-table
-               do (format t "~a: ~a~%" key val))
-         (setf stack (list (make-transform-matrix)))
-         (clear-screen)
-         (dolist (op ops)
-           (funcall op))
-         (save-frame basename frame frames-digs))
+       (let ((frames-digs (integer-digits (1- frames))))
+         (dotimes (frame frames)
+           (dolist (op knob-ops)
+             (funcall op frame))
+           (format t "Frame ~a:~%" frame)
+           (loop for key being the hash-key in symbol-table
+                 and val being the hash-value in symbol-table
+                 do (format t "~a: ~a~%" key val))
+           (funcall clear-stack)
+           (clear-screen)
+           (dolist (op ops)
+             (funcall op))
+           (save-frame basename frame frames-digs)))
        (make-animation basename))
       (t (dolist (op ops)
            (funcall op))))))
