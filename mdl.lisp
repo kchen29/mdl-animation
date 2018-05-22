@@ -29,7 +29,7 @@
         
         basename
         frames
-        (symbol-table (make-hash-table))
+        (symbol-table (make-hash-table :test #'equal))
         knob-ops
         ops)
     (labels ((post-add-lines ()
@@ -125,12 +125,23 @@
             (display
              (add-op
               (display t)))))))
-    (if frames
-        (dolist (frame (1+ frames))
-          (dolist (op knob-ops)
-            (funcall op frame))
-          (dolist (op ops)
-            (funcall op))
-          (save-frame basename frame))
-        (dolist (op ops)
-          (funcall op)))))
+    (setf ops (nreverse ops)
+          knob-ops (nreverse knob-ops))
+    (cond
+      (frames
+       (do ((frame 0 (1+ frame))
+            (frames-digs (integer-digits (1- frames))))
+           ((>= frame frames))
+         (dolist (op knob-ops)
+           (funcall op frame))
+         (loop for key being the hash-key in symbol-table
+               and val being the hash-value in symbol-table
+               do (format t "~a: ~a~%" key val))
+         (setf stack (list (make-transform-matrix)))
+         (clear-screen)
+         (dolist (op ops)
+           (funcall op))
+         (save-frame basename frame frames-digs))
+       (make-animation basename))
+      (t (dolist (op ops)
+           (funcall op))))))

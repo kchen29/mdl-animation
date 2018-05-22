@@ -66,6 +66,18 @@
                :input (make-string-input-stream (screen-to-destination nil))
                :wait wait :search t))
 
-(defun save-frame (basename frame-num)
-  "Saves a frame with BASENAME and FRAMENUM."
-  (save ))
+(defun save-frame (basename frame digits)
+  "Saves a frame with BASENAME, FRAME, and DIGITS for frames."
+  (ensure-directories-exist "anim/")
+  (save (format nil "anim/~a~a~a.png"
+                basename
+                (make-string (- digits (integer-digits frame)) :initial-element #\0)
+                frame)))
+
+(defun make-animation (basename)
+  "Creates an animation using BASENAME."
+  (run-program "convert" (list "-delay"
+                               "3"
+                               (format nil "anim/~a*" basename)
+                               (format nil "anim/~a.gif" basename))
+               :wait nil :search t))

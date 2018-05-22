@@ -151,6 +151,13 @@
   "Calculates the difference quotient of A minus B divided by C minus D."
   (/ (- a b) (- c d)))
 
+;;numbers
+(defun integer-digits (number)
+  "Returns the number of digits in NUMBER."
+  (if (= number 0)
+      1
+      (1+ (floor (log number 10)))))
+
 ;;array
 (defun copy-array (array)
   "Copies an array."
@@ -179,5 +186,4 @@
 (defun whitespace-p (char)
   "Returns true if CHAR is a whitespace character."
   (or (not (graphic-char-p char)) (char= char #\Space)))
-
 
