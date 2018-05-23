@@ -125,7 +125,7 @@
           ((focal number))
           (display
            (add-op
-             (display t))))))
+             (display))))))
     (values basename frames symbol-table (nreverse knob-ops) (nreverse ops)
             (lambda () (setf stack (list (make-transform-matrix)))))))
 

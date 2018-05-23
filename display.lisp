@@ -20,29 +20,31 @@
   "Writes a ppm, assuming P3 and max color value of 255.
    Writes to FILENAME with *SCREEN*."
   (with-open-file (stream filename :direction :output :if-exists :supersede)
-    (let ((*standard-output* stream))
-      (print-screen))))
+    (print-screen stream)))
 
-(defun print-screen ()
-  "Prints *SCREEN* to standard out."
+(defun print-screen (stream)
+  "Prints *SCREEN* to STREAM. Returns STREAM."
   ;;fairly optimized
-  (declare (optimize (speed 3) (debug 0)))
-  (format t "P3 ~a ~a 255 " +screen-side+ +screen-side+)
+  (declare (optimize (speed 3) (debug 0))
+           (type stream stream))
+  (format stream "P3 ~a ~a 255~%" +screen-side+ +screen-side+)
   (do ((y (1- +screen-side+) (1- y)))
       ((< y 0))
     (dotimes (x +screen-side+)
       (dolist (c (aref *screen* x y))
-        (princ c)
-        (write-char #\ )))))
+        (princ c stream)
+        ;; (write-char (code-char c))
+        (write-char #\  stream))))
+  stream)
 
 (defun save (filename)
   "Saves *SCREEN* to filename.
    Attempts conversion using imagemagick's convert if filename is not a ppm."
   (if (equal (pathname-type (pathname filename)) "ppm")
       (write-ppm filename)
-      (run-program "convert" (list "-" filename)
-                   :input (make-string-input-stream (output-to-string (print-screen)))
-                   :wait nil :search t)))
+      (close (print-screen (process-input (run-program "convert" (list "-" filename)
+                                                       :input :stream
+                                                       :wait nil :search t))))))
 
 (defun clear-screen ()
   "Clears *SCREEN*. Sets all the pixels to black.
@@ -52,13 +54,13 @@
       (setf (aref *screen* x y) '(0 0 0)
             (aref *z-buffer* x y) most-negative-double-float))))
 
-(defun display (&optional (wait nil))
+(defun display ()
   "Displays the image with *SCREEN*.
    If WAIT is t, then will wait until display ends
    Uses imagemagick's display to display an image."
-  (run-program "display" (list "-")
-               :input (make-string-input-stream (output-to-string (print-screen)))
-               :wait wait :search t))
+  (close (print-screen (process-input (run-program "display" (list "-")
+                                                   :input :stream
+                                                   :wait nil :search t)))))
 
 (defun save-frame (basename frame digits)
   "Saves a frame with BASENAME, FRAME, and DIGITS for frames."

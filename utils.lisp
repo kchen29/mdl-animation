@@ -186,11 +186,3 @@
 (defun whitespace-p (char)
   "Returns true if CHAR is a whitespace character."
   (or (not (graphic-char-p char)) (char= char #\Space)))
-
-;;streams
-(defmacro output-to-string (&body body)
-  "All writes to standard output in BODY is returned as a string instead."
-  (let ((temp (gensym)))
-    `(with-output-to-string (,temp)
-       (let ((*standard-output* ,temp))
-         ,@body))))
