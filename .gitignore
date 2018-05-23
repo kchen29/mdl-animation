@@ -1,7 +1,7 @@
 *~
 *.ppm
 *.png
-
+anim/
 
 *.FASL
 *.fasl

@@ -26,20 +26,16 @@
   "Writes a ppm, assuming P3 and max color value of 255.
    Writes to FILENAME with *SCREEN*."
   (with-open-file (stream filename :direction :output :if-exists :supersede)
-    (screen-to-destination stream)))
+    (let ((*standard-output* stream))
+      (print-screen))))
 
-(defun screen-to-destination (destination)
-  "Turns *SCREEN* into a string, which is then passed on to DESTINATION via format."
-  (format destination
-          "P3 ~a ~a 255 ~{~%~{~{~a ~a ~a ~}~}~}"
-          *screen-side* *screen-side* (screen-to-list)))
-
-(defun screen-to-list ()
-  "Turns *SCREEN* into a list.
-   Places (0, 0) on the lower left corner of the list."
+(defun print-screen ()
+  "Prints *SCREEN* to standard out."
+  (format t "P3 ~a ~a 255" *screen-side* *screen-side*)
   (loop for y from (1- *screen-side*) downto 0
-        collect (loop for x below *screen-side*
-                      collect (aref *screen* x y))))
+        do (progn (format t "~%")
+                  (loop for x below *screen-side*
+                        do (format t "~{~a ~}" (aref *screen* x y))))))
 
 (defun save (filename)
   "Saves *SCREEN* to filename.
@@ -47,7 +43,7 @@
   (if (equal (pathname-type (pathname filename)) "ppm")
       (write-ppm filename)
       (run-program "convert" (list "-" filename)
-                   :input (make-string-input-stream (screen-to-destination nil))
+                   :input (make-string-input-stream (output-to-string (print-screen)))
                    :wait nil :search t)))
 
 (defun clear-screen ()
@@ -63,7 +59,7 @@
    If WAIT is t, then will wait until display ends
    Uses imagemagick's display to display an image."
   (run-program "display" (list "-")
-               :input (make-string-input-stream (screen-to-destination nil))
+               :input (make-string-input-stream (output-to-string (print-screen)))
                :wait wait :search t))
 
 (defun save-frame (basename frame digits)
@@ -76,8 +72,12 @@
 
 (defun make-animation (basename)
   "Creates an animation using BASENAME."
-  (run-program "convert" (list "-delay"
-                               "3"
-                               (format nil "anim/~a*" basename)
-                               (format nil "anim/~a.gif" basename))
-               :wait nil :search t))
+  ;;make sure if the gif already exists, delete it
+  (let ((gif (format nil "anim/~a.gif" basename)))
+    (when (probe-file gif)
+      (delete-file gif))
+    (run-program "convert" (list "-delay"
+                                 "3"
+                                 (format nil "anim/~a*" basename)
+                                 gif)
+                 :wait nil :search t)))
