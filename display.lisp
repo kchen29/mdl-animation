@@ -4,7 +4,7 @@
 (defparameter *screen* (make-array '(500 500) :initial-element '(0 0 0)))
 (defparameter *z-buffer* (make-array '(500 500) :initial-element most-negative-double-float))
 (declaim (type (simple-array list (500 500)) *screen*)
-         (type (simple-array double-float (500 500)) *z-buffer*))
+         (type (simple-array number (500 500)) *z-buffer*))
 
 (defun plot (x y z color)
   "Plots (x, y) on *SCREEN* with COLOR. Checks bounds.
@@ -25,10 +25,11 @@
 
 (defun print-screen ()
   "Prints *SCREEN* to standard out."
-  (format t "P3 ~a ~a 255" +screen-side+ +screen-side+)
+  ;;fairly optimized
+  (declare (optimize (speed 3) (debug 0)))
+  (format t "P3 ~a ~a 255 " +screen-side+ +screen-side+)
   (do ((y (1- +screen-side+) (1- y)))
       ((< y 0))
-    (terpri)
     (dotimes (x +screen-side+)
       (dolist (c (aref *screen* x y))
         (princ c)
