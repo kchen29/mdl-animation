@@ -1,10 +1,17 @@
 //here's a fun experiment: rotate it.
+//the sleek fur of the feline catus and its bundle of leg muscles allow it to reach astonishing speeds
+frames 72
+basename cat
+vary body 0 17 0 1
+vary body 17 53 1 -1
+vary body 53 71 -1 0
 //offset world
 push
 move 0 135 0
 //body 230 135
 push
 move 230 135 0
+rotate z 17 body
 push
 scale 2 1 1
 sphere 0 0 0 62
@@ -20,6 +27,7 @@ pop
 //head 66 173
 push
 move -69 10 0
+rotate z -17 body
 push
 scale 1 1 1.24
 sphere 0 0 0 50
@@ -136,5 +144,3 @@ scale 1 4 1
 sphere 0 0 0 14
 pop
 pop
-display
-save cat.png
