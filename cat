@@ -1,57 +1,84 @@
 //here's a fun experiment: rotate it.
 //the sleek fur of the feline catus and its bundle of leg muscles allow it to reach astonishing speeds
-frames 72
-basename cat
-vary body 0 17 0 1
-vary body 17 53 1 -1
-vary body 53 71 -1 0
 //offset world
 push
 move 0 135 0
-//body 230 135
+//body1
 push
-move 230 135 0
-rotate z 17 body
+move 240 135 0
 push
 scale 2 1 1
 sphere 0 0 0 62
 pop
-//neck 135 163
+//body2
 push
-move -95 28 0
+move -95 15 0
 push
-rotate z -5
-scale 1.8 1 1.2
+rotate z -10
+scale 1.5 1 1.2
 sphere 0 0 0 48
 pop
-//head 66 173
+//left arm1
 push
-move -69 10 0
-rotate z -17 body
+move -30 -25 55
+rotate z -25
+push
+scale 1 2.8 1
+sphere 0 0 0 18
+pop
+//left arm2
+push
+move -40 -55 0
+rotate z 20
+scale 4 1 1
+sphere 0 0 0 14
+pop
+pop
+//right arm1
+push
+move -30 -25 -55
+rotate z -25
+push
+scale 1 2.8 1
+sphere 0 0 0 18
+pop
+//right arm2
+push
+move -40 -55 0
+rotate z 20
+scale 4 1 1
+sphere 0 0 0 14
+pop
+pop
+//head
+push
+move -65 10 0
 push
 scale 1 1 1.24
 sphere 0 0 0 50
 pop
-//muzzle 42 127
+//muzzle
 push
-move -24 -47 0
+move -38 -25 0
 rotate z -25
-scale 2 1 3.5
+scale 2.5 1 3.5
 sphere 0 0 0 10
 pop
 //not religious, but god help me
-//left ear 53 207
+//left ear
 push
-move -13 34 45
-rotate z -48
-scale 2.37 1 1
+move 5 34 45
+rotate z -100
+rotate x 20
+scale 2.1 1 1
 sphere 0 0 0 11
 pop
-//right ear 29 196
+//right ear
 push
-move -37 23 -45
-rotate z -21
-scale 2.37 1 1
+move 0 34 -45
+rotate z -100
+rotate x -20
+scale 2.1 1 1
 sphere 0 0 0 11
 pop
 pop
@@ -64,52 +91,21 @@ rotate z -5
 scale 4.6 1 1
 sphere 0 0 0 14
 pop
-//tail2 413 174
+//tail2
 push
-move 65 -1 0
+move 65 -3 0
 push
-rotate z 6
+rotate z 4
 scale 3.37 1 1
 sphere 0 0 0 11
 pop
-//tail3 459 185
+//tail3
 push
-move 46 12 0
-rotate z 28
+move 46 0 0
+rotate z -10
 scale 3.4 1 1
 sphere 0 0 0 8
 pop
-pop
-pop
-//left arm 145 143
-push
-move -85 8 62
-push
-scale 3 1 1
-sphere 0 0 0 16
-pop
-//left paw 100 120
-push
-move -45 -25 0
-rotate z -20
-scale 1 2.26 1
-sphere 0 0 0 14
-pop
-pop
-//right arm 105 96
-push
-move -125 -39 -25
-push
-rotate z 13
-scale 2.4 1 1
-sphere 0 0 0 18
-pop
-//right paw 72 73
-push
-move -33 -23 0
-rotate z 15
-scale 1 2.1 1
-sphere 0 0 0 14
 pop
 pop
 //left leg 368 92
@@ -144,3 +140,4 @@ scale 1 4 1
 sphere 0 0 0 14
 pop
 pop
+display
