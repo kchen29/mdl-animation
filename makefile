@@ -5,4 +5,4 @@ all:
 	$(sbcl) '(compile-mdl "$(script)")'
 
 clean:
-	rm -f *~ *.fasl *.ppm *.png
+	rm -f *~ *.fasl *.ppm *.png anim/*

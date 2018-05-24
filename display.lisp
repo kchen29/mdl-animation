@@ -17,9 +17,9 @@
           (aref *z-buffer* x y) z)))
 
 (defun write-ppm (filename)
-  "Writes a ppm, assuming P3 and max color value of 255.
+  "Writes a ppm, assuming P6 and max color value of 255.
    Writes to FILENAME with *SCREEN*."
-  (with-open-file (stream filename :direction :output :if-exists :supersede)
+  (with-open-file (stream filename :direction :output :if-exists :supersede :element-type :default)
     (print-screen stream)))
 
 (defun print-screen (stream)
@@ -27,14 +27,12 @@
   ;;fairly optimized
   (declare (optimize (speed 3) (debug 0))
            (type stream stream))
-  (format stream "P3 ~a ~a 255~%" +screen-side+ +screen-side+)
+  (format stream "P6 ~a ~a 255~%" +screen-side+ +screen-side+)
   (do ((y (1- +screen-side+) (1- y)))
       ((< y 0))
     (dotimes (x +screen-side+)
       (dolist (c (aref *screen* x y))
-        (princ c stream)
-        ;; (write-char (code-char c))
-        (write-char #\  stream))))
+        (write-byte c stream))))
   stream)
 
 (defun save (filename)
