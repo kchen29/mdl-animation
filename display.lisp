@@ -16,15 +16,8 @@
     (setf (aref *screen* x y) color
           (aref *z-buffer* x y) z)))
 
-(defun write-ppm (filename)
-  "Writes a ppm, assuming P6 and max color value of 255.
-   Writes to FILENAME with *SCREEN*."
-  (with-open-file (stream filename :direction :output :if-exists :supersede :element-type :default)
-    (print-screen stream)))
-
 (defun print-screen (stream)
-  "Prints *SCREEN* to STREAM. Returns STREAM."
-  ;;fairly optimized
+  "Prints *SCREEN* to STREAM as a ppm (P6). Returns STREAM."
   (declare (optimize (speed 3) (debug 0))
            (type stream stream))
   (format stream "P6 ~a ~a 255~%" +screen-side+ +screen-side+)
@@ -35,22 +28,32 @@
         (write-byte c stream))))
   stream)
 
+(defun clear-screen ()
+  "Clears *SCREEN*. Sets all the pixels to black.
+   Clears *Z-BUFFER*. Sets all the values to the least float."
+  (declare (optimize (speed 3) (debug 0)))
+  (dotimes (x +screen-side+)
+    (dotimes (y +screen-side+)
+      (psetf (aref *screen* x y) '(0 0 0)
+             (aref *z-buffer* x y) most-negative-double-float))))
+
 (defun save (filename)
   "Saves *SCREEN* to filename.
    Attempts conversion using imagemagick's convert if filename is not a ppm."
   (if (equal (pathname-type (pathname filename)) "ppm")
-      (write-ppm filename)
-      (close (print-screen (process-input (run-program "convert" (list "-" filename)
-                                                       :input :stream
-                                                       :wait nil :search t))))))
+      (save-ppm filename)
+      (save-extension filename)))
 
-(defun clear-screen ()
-  "Clears *SCREEN*. Sets all the pixels to black.
-   Clears *Z-BUFFER*. Sets all the values to the least float."
-  (dotimes (x +screen-side+)
-    (dotimes (y +screen-side+)
-      (setf (aref *screen* x y) '(0 0 0)
-            (aref *z-buffer* x y) most-negative-double-float))))
+(defun save-ppm (filename)
+  "Saves *SCREEN* with FILENAME as a rawfile ppm (P6) and with a max color value of 255."
+  (with-open-file (stream filename :direction :output :if-exists :supersede :element-type :default)
+    (print-screen stream)))
+
+(defun save-extension (filename)
+  "Saves *SCREEN* with the extension given by FILENAME. Uses imagemagick's convert."
+  (close (print-screen (process-input (run-program "convert" (list "-" filename)
+                                                   :input :stream
+                                                   :wait nil :search t)))))
 
 (defun display ()
   "Displays the image with *SCREEN*.
@@ -63,10 +66,10 @@
 (defun save-frame (basename frame digits)
   "Saves a frame with BASENAME, FRAME, and DIGITS for frames."
   (ensure-directories-exist "anim/")
-  (save (format nil "anim/~a~a~a.png"
-                basename
-                (make-string (- digits (integer-digits frame)) :initial-element #\0)
-                frame)))
+  (save-extension (format nil "anim/~a~a~a.png"
+                          basename
+                          (make-string (- digits (integer-digits frame)) :initial-element #\0)
+                          frame)))
 
 (defun make-animation (basename)
   "Creates an animation using BASENAME."
