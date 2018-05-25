@@ -1,11 +1,41 @@
-//here's a fun experiment: rotate it.
+//here's still a fun experiment: rotate it
+//No cats were harmed in the making of this animation
 //the sleek fur of the feline catus and its bundle of leg muscles allow it to reach astonishing speeds
+frames 60
+basename cat
+vary body 0 14 0 1
+vary body 15 44 1 -1
+vary body 45 59 -1 0
+//(front|rear)[(right|left)(rotate)|(extend|contract)]
+vary fe 0 14 0 1
+vary fe 15 29 1 1
+vary fe 30 59 1 0
+vary flr 0 14 0 -1
+vary flr 15 29 -1 1
+vary flr 30 44 1 1
+vary flr 45 59 1 0
+vary frr 0 9 0 -1
+vary frr 10 24 -1 1
+vary frr 25 39 1 1
+vary frr 40 59 1 0
+vary rc 0 29 0 1
+vary rc 30 44 1 0
+vary rc 45 59 0 0
+vary rlr 0 29 0 1
+vary rlr 29 44 1 0
+vary rlr 45 59 0 0
+vary rrr 0 34 0 1
+vary rrr 35 49 1 0
+vary rrr 50 59 0 0
 //offset world
 push
 move 0 135 0
 //body1
 push
-move 240 135 0
+move 220 135 0
+rotate y 5
+rotate x 5
+rotate z 17 body
 push
 scale 2 1 1
 sphere 0 0 0 62
@@ -15,46 +45,51 @@ push
 move -95 15 0
 push
 rotate z -10
-scale 1.5 1 1.2
-sphere 0 0 0 48
+scale 1.16 .85 1
+sphere 0 0 0 62
 pop
 //left arm1
 push
-move -30 -25 55
-rotate z -25
+move -20 30 55
+rotate z 30 flr
+rotate z -10
 push
-scale 1 2.8 1
-sphere 0 0 0 18
+scale 1 2.4 1
+sphere 0 -27 0 27
 pop
 //left arm2
 push
-move -40 -55 0
-rotate z 20
-scale 4 1 1
-sphere 0 0 0 14
+move 0 -120 0
+rotate z 108 fe
+rotate z -18
+scale 3.5 1 1
+sphere -14 0 0 14
 pop
 pop
 //right arm1
 push
-move -30 -25 -55
-rotate z -25
+move -20 30 -55
+rotate z 30 frr
+rotate z -10
 push
-scale 1 2.8 1
-sphere 0 0 0 18
+scale 1 2.4 1
+sphere 0 -27 0 27
 pop
 //right arm2
 push
-move -40 -55 0
-rotate z 20
-scale 4 1 1
-sphere 0 0 0 14
+move 0 -120 0
+rotate z 108 fe
+rotate z -18
+scale 3.5 1 1
+sphere -14 0 0 14
 pop
 pop
 //head
 push
-move -65 10 0
+move -65 15 0
+rotate z -17 body
 push
-scale 1 1 1.24
+scale 1 1 1.1
 sphere 0 0 0 50
 pop
 //muzzle
@@ -68,22 +103,22 @@ pop
 //left ear
 push
 move 5 34 45
-rotate z -100
 rotate x 20
-scale 2.1 1 1
+rotate z -10
+scale 1 2.1 1
 sphere 0 0 0 11
 pop
 //right ear
 push
 move 0 34 -45
-rotate z -100
 rotate x -20
-scale 2.1 1 1
+rotate z -10
+scale 1 2.1 1
 sphere 0 0 0 11
 pop
 pop
 pop
-//tail1 348 175
+//tail1
 push
 move 118 40 0
 push
@@ -108,36 +143,59 @@ sphere 0 0 0 8
 pop
 pop
 pop
-//left leg 368 92
+//left leg1
 push
-move 138 -43 30
+move 100 30 50
+rotate z -75 rlr
+rotate z 35
 push
-rotate z -22
-scale 2.9 1 1
-sphere 0 0 0 22
+scale 1 1.4 1
+sphere 0 -40 0 40
 pop
-//left foot 437 54
+//left leg2
 push
-move 69 -38 0
-rotate z 42
+move -10 -95 0
+rotate z 50 rc
+rotate z -20
+push
+scale 2 1 1
+sphere 30 0 0 30
+pop
+//left foot
+push
+move 120 0 0
+rotate z -110 rc
+rotate z 70
 scale 1 4 1
-sphere 0 0 0 14
+sphere 0 -14 0 14
 pop
 pop
-//right leg 359 76
-push
-move 129 -59 -30
-push
-rotate z -22
-scale 2.9 1 1
-sphere 0 0 0 22
 pop
-//right foot 428 38
+//right leg1
 push
-move 69 -38 0
-rotate z 41
+move 100 30 -50
+rotate z -75 rrr
+rotate z 35
+push
+scale 1 1.4 1
+sphere 0 -40 0 40
+pop
+//right leg2
+push
+move -10 -95 0
+rotate z 50 rc
+rotate z -20
+push
+scale 2 1 1
+sphere 30 0 0 30
+pop
+//right foot
+push
+move 120 0 0
+rotate z -110 rc
+rotate z 70
 scale 1 4 1
-sphere 0 0 0 14
+sphere 0 -14 0 14
 pop
 pop
-display
+pop
