@@ -18,6 +18,12 @@
     "Clears MATRIX."
     (setf last-col 0))
 
+  (defun adjust-matrix (matrix new-rows new-cols)
+    "Adjusts MATRIX to ROWS and COLS. Keeps last-col."
+    (adjust-array array (list new-rows new-cols))
+    (setf rows new-rows)
+    (setf cols new-cols))
+
   (defun to-identity (matrix)
     "Turns MATRIX into an identity matrix. Returns the matrix."
     (dotimes (x rows matrix)
@@ -26,18 +32,18 @@
             (setf (aref array x y) 1)
             (setf (aref array x y) 0)))))
 
-  (defun matrix-multiply (matrix m2)
-    "A specific matrix multiplication routine. MATRIX is square.
+  ;;closure, for fun
+  (let ((temp (make-array 4)))
+    (defun matrix-multiply (matrix m2)
+      "A specific matrix multiplication routine. MATRIX is square, 4 by 4
      Multiplies MATRIX with M2. Modifies M2 to hold the result. Returns M2."
-    (with-args ((cols2 cols) (last-col2 last-col)) m2
-      (let ((temp (make-array rows)))
-        (dotimes (col last-col2 m2)
-          (dotimes (i rows)
-            (setf (svref temp i) (mref m2 i col)))
-          (dotimes (row rows)
-            (setf (mref m2 row col)
-                  (loop for i below cols
-                        sum (* (aref array row i) (svref temp i))))))))))
+      (dotimes (col (m-last-col m2) m2)
+        (dotimes (i rows)
+          (setf (svref temp i) (mref m2 i col)))
+        (dotimes (row rows)
+          (setf (mref m2 row col)
+                (loop for i below cols
+                      sum (* (aref array row i) (svref temp i)))))))))
 
 ;;;transformations
 (defun make-transform-matrix ()
