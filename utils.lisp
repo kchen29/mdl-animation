@@ -144,7 +144,7 @@
 
 (defun >-close-float (float1 float2)
   "Returns if FLOAT1 is greater than FLOAT2 by double-float-epsilon amount."
-  (> double-float-epsilon (- float1 float2)))
+  (> (- float1 float2) double-float-epsilon))
 
 (defun diff-quot (a b c d)
   "Calculates the difference quotient of A minus B divided by C minus D."
