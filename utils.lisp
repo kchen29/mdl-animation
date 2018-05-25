@@ -142,10 +142,9 @@
         for product = 1 then (* x product)
         sum (* coeff product)))
 
-(defun fround-to (number decimals)
-  "Rounds NUMBER to DECIMALS places."
-  (/ (fround (* number (expt 10 decimals)))
-     (expt 10 decimals)))
+(defun >-close-float (float1 float2)
+  "Returns if FLOAT1 is greater than FLOAT2 by double-float-epsilon amount."
+  (> double-float-epsilon (- float1 float2)))
 
 (defun diff-quot (a b c d)
   "Calculates the difference quotient of A minus B divided by C minus D."

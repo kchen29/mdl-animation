@@ -9,12 +9,12 @@
 (defun plot (x y z color)
   "Plots (x, y) on *SCREEN* with COLOR. Checks bounds.
    COLOR is not copied. Checks the z-value with *z-buffer*."
-  ;;round to 3 decimal places
-  (setf z (fround-to z 3))
+  (declare (optimize (speed 3) (debug 0))
+           (type fixnum x y))
   (when (and (< -1 x +screen-side+) (< -1 y +screen-side+)
-             (> z (aref *z-buffer* x y)))
-    (setf (aref *screen* x y) color
-          (aref *z-buffer* x y) z)))
+             (>-close-float z (aref *z-buffer* x y)))
+    (psetf (aref *screen* x y) color
+           (aref *z-buffer* x y) z)))
 
 (defun print-screen (stream)
   "Prints *SCREEN* to STREAM as a ppm (P6). Returns STREAM."
