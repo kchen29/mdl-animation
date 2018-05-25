@@ -61,20 +61,26 @@
              (pop stack)))
 
           ((move number number number (&opt symbol))
-           (add-op (with-knob (v a4)
-                     (update-current-stack (make-translate (* a1 v)
-                                                           (* a2 v)
-                                                           (* a3 v))))))
+           (if a4
+               (add-op (with-knob (v a4)
+                         (update-current-stack (make-translate (* a1 v)
+                                                               (* a2 v)
+                                                               (* a3 v)))))
+               (add-op (update-current-stack (make-translate a1 a2 a3)))))
           ((scale number number number (&opt symbol))
-           (add-op (with-knob (v a4)
-                     (update-current-stack (make-scale (* a1 v)
-                                                       (* a2 v)
-                                                       (* a3 v))))))
+           (if a4
+               (add-op (with-knob (v a4)
+                         (update-current-stack (make-scale (* a1 v)
+                                                           (* a2 v)
+                                                           (* a3 v)))))
+               (add-op (update-current-stack (make-scale a1 a2 a3)))))
           ((rotate symbol number (&opt symbol))
-           (add-op (with-knob (v a3)
-                     (update-current-stack (make-rotate (concat-symbol a1)
-                                                        (* a2 v))))))
-
+           (if a3
+               (add-op (with-knob (v a3)
+                         (update-current-stack (make-rotate (concat-symbol a1)
+                                                            (* a2 v)))))
+               (add-op (update-current-stack (make-rotate (concat-symbol a1)
+                                                          a2)))))
           ((sphere (&opt symbol) number number number number (&opt symbol))
            (add-op
              (add-sphere polygons 10 a2 a3 a4 a5)
@@ -101,14 +107,14 @@
           ((frames number)
            (setf frames a1))
           ((vary symbol number number number number)
-           (push (lambda (frame)
-                   (cond
-                     ((= frame a2)
-                      (setf (gethash a1 symbol-table)
-                            a4))
-                     ((<= a2 frame a3)
-                      (incf (gethash a1 symbol-table) (/ (- a5 a4) (- a3 a2))))))
-                 knob-ops))
+           (let ((dif (diff-quot a5 a4 a3 a2)))
+             (push (lambda (frame)
+                     (cond
+                       ((= frame a2)
+                        (setf (gethash a1 symbol-table) a4))
+                       ((<= a2 frame a3)
+                        (incf (gethash a1 symbol-table) dif))))
+                   knob-ops)))
           ((setknobs number))
 
           ((light symbol number number number number number number))
@@ -126,12 +132,12 @@
           (display
            (add-op
              (display))))))
-    (values basename frames symbol-table (nreverse knob-ops) (nreverse ops)
+    (values basename frames (nreverse knob-ops) (nreverse ops)
             (lambda () (setf stack (list (make-transform-matrix)))))))
 
 (defun compile-mdl (file)
   "Compiles FILE to an image."
-  (multiple-value-bind (basename frames symbol-table knob-ops ops clear-stack)
+  (multiple-value-bind (basename frames knob-ops ops clear-stack)
       (parse-mdl (lexify file #'classifier))
     (cond
       (frames
@@ -139,10 +145,7 @@
          (dotimes (frame frames)
            (dolist (op knob-ops)
              (funcall op frame))
-           (format t "Frame ~a:~%" frame)
-           (loop for key being the hash-key in symbol-table
-                 and val being the hash-value in symbol-table
-                 do (format t "~a: ~a~%" key val))
+           (format t "Frame ~a~%" frame)
            (funcall clear-stack)
            (clear-screen)
            (dolist (op ops)

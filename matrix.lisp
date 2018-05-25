@@ -14,30 +14,10 @@
     "Copies a matrix."
     (make-matrix :rows rows :cols cols :last-col last-col :array (copy-array array)))
 
-  ;;other matrix functions
-  (defun adjust-matrix (matrix new-rows new-cols)
-    "Adjusts MATRIX to ROWS and COLS. Keeps last-col."
-    (adjust-array array (list new-rows new-cols))
-    (setf rows new-rows)
-    (setf cols new-cols))
-
   (defun clear-matrix (matrix)
     "Clears MATRIX."
-    (adjust-matrix matrix 4 4)
     (setf last-col 0))
 
-  ;;print-matrix
-  (defun print-matrix (matrix stream)
-    "Prints out MATRIX to STREAM."
-    (format stream "~{~%~{~a~4,4T~}~}~%" (matrix-to-list matrix)))
-
-  (defun matrix-to-list (matrix)
-    "Turns MATRIX into a list."
-    (loop for x below rows
-          collect (loop for y below last-col
-                        collect (aref array x y))))
-
-  ;;identity, and multiply
   (defun to-identity (matrix)
     "Turns MATRIX into an identity matrix. Returns the matrix."
     (dotimes (x rows matrix)
