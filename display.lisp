@@ -18,7 +18,7 @@
 
 (defun print-screen (stream)
   "Prints *SCREEN* to STREAM as a ppm (P6). Returns STREAM."
-  (declare (optimize (speed 3) (debug 0))
+  (declare (optimize (speed 3) (debug 0) (safety 0))
            (type stream stream))
   (format stream "P6 ~a ~a 255~%" +screen-side+ +screen-side+)
   (do ((y (1- +screen-side+) (1- y)))
