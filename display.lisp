@@ -9,7 +9,7 @@
 (defun plot (x y z color)
   "Plots (x, y) on *SCREEN* with COLOR. Checks bounds.
    COLOR is not copied. Checks the z-value with *z-buffer*."
-  (declare (optimize (speed 3) (debug 0))
+  (declare (optimize (speed 3) (debug 0) (safety 0))
            (type fixnum x y))
   (when (and (< -1 x +screen-side+) (< -1 y +screen-side+)
              (>-close-float z (aref *z-buffer* x y)))
