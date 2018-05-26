@@ -4,7 +4,7 @@
 (defparameter *screen* (make-array '(500 500) :initial-element '(0 0 0)))
 (defparameter *z-buffer* (make-array '(500 500) :initial-element most-negative-double-float))
 (declaim (type (simple-array list (500 500)) *screen*)
-         (type (simple-array number (500 500)) *z-buffer*))
+         (type (simple-array real (500 500)) *z-buffer*))
 
 (defun plot (x y z color)
   "Plots (x, y) on *SCREEN* with COLOR. Checks bounds.

@@ -142,6 +142,9 @@
         for product = 1 then (* x product)
         sum (* coeff product)))
 
+
+(declaim (inline >-close-float diff-quot safe-diff-quot))
+
 (defun >-close-float (float1 float2)
   "Returns if FLOAT1 is greater than FLOAT2 by double-float-epsilon amount."
   (> (- float1 float2) double-float-epsilon))
@@ -149,6 +152,12 @@
 (defun diff-quot (a b c d)
   "Calculates the difference quotient of A minus B divided by C minus D."
   (/ (- a b) (- c d)))
+
+(defun safe-diff-quot (a b denom)
+  "DIFF-QUOT, but if the denominator is 0, returns 0."
+  (if (zerop denom)
+      0
+      (/ (- a b) denom)))
 
 ;;numbers
 (defun integer-digits (number)
