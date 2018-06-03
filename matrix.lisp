@@ -1,6 +1,6 @@
 ;;;; Matrices and transformations.
 
-(def-class (matrix :conc-name m-)
+(def-my-class (matrix :conc-name m-)
     ((rows 4)
      (cols 4)
      (last-col 0)
@@ -36,14 +36,16 @@
   (let ((temp (make-array 4)))
     (defun matrix-multiply (matrix m2)
       "A specific matrix multiplication routine. MATRIX is square, 4 by 4
-     Multiplies MATRIX with M2. Modifies M2 to hold the result. Returns M2."
-      (dotimes (col (m-last-col m2) m2)
-        (dotimes (i rows)
-          (setf (svref temp i) (mref m2 i col)))
-        (dotimes (row rows)
-          (setf (mref m2 row col)
-                (loop for i below cols
-                      sum (* (aref array row i) (svref temp i)))))))))
+       Multiplies MATRIX with M2. Modifies M2 to hold the result. Returns M2."
+      (let ((array array)
+            (array2 (m-array m2)))
+        (dotimes (col (m-last-col m2) m2)
+          (dotimes (i rows)
+            (setf (svref temp i) (aref array2 i col)))
+          (dotimes (row rows)
+            (setf (aref array2 row col)
+                  (loop for i below cols
+                        sum (* (aref array row i) (svref temp i))))))))))
 
 ;;;transformations
 (defun make-transform-matrix ()

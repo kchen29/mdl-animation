@@ -31,42 +31,54 @@
   `(collect-to
      (nested-loops ,loops ,@(mapcar (lambda (x) `(collect ,x)) bases))))
 
-;;object
-(defmacro def-class (name-args args &rest rest)
-  "Defines a class. NAME-ARGS can be a symbol or a list (with :conc-name).
-   ARGS defines the variables and their initial values.
-   REST is wrapped with a with-args, with all the args, using the NAME of the class.
-   Provides accessor functions for each arg."
-  (let ((temp (gensym))
-        (name (if (listp name-args)
-                  (pop name-args)
-                  name-args))
-        (conc (if (listp name-args)
-                  (getf name-args :conc-name)
-                  (concat-symbol name-args "-")))
-        (arg-names (mapcar #'car args)))
-    `(progn
-       (defun ,(concat-symbol "make-" name) (&key ,@args)
-         (let ((,temp (make-hash-table :size ,(length arg-names))))
-           (setf ,@(loop for arg in arg-names
-                         collect `(gethash ,(make-keyword arg) ,temp)
-                         collect arg))
-           ,temp))
-       ,@(mapcar (lambda (x) `(defmacro ,(concat-symbol conc x) (,name)
-                                `(gethash ,,(make-keyword x) ,,name)))
-                 arg-names)
-       (with-args ,arg-names ,name
-         ,@rest))))
+;;object system
+;;CLASSES is a hashtable where the keys are the class name and the value is a hashtable
+;;in the inner hashtable, each key is a slot and the value is the corresponding index in the vector
+(let ((classes (make-hash-table)))
+  (defmacro def-my-class (name-args args &rest rest)
+    "Defines a class. NAME-ARGS can be a symbol or a list (with :conc-name).
+     ARGS defines the variables and their initial values.
+     Provides accessor functions for each arg.
+     REST is wrapped with a with-args, with all the ARGS, using the NAME of the class."
+    (let ((name (if (listp name-args)
+                    (pop name-args)
+                    name-args))
+          (conc (if (listp name-args)
+                    (getf name-args :conc-name)
+                    (concat-symbol name-args "-")))
+          (arg-names (mapcar #'car args))
+          (table (make-hash-table)))
+      (loop for arg in arg-names
+            for i from 0
+            do (setf (gethash arg table) i))
+      (setf (gethash name classes) table)
+      `(progn
+         (defun ,(concat-symbol "make-" name) (&key ,@args)
+           (vector ,@arg-names))
+         ,@(loop for arg in arg-names
+                 for i from 0
+                 collect `(defmacro ,(concat-symbol conc arg) (,name)
+                            `(svref ,,name ,,i)))
+         (with-args ,arg-names ,name
+           ,@rest))))
 
-(defmacro with-args (args obj &body body)
-  "Wraps BODY with a symbol-macrolet, allowing each arg in OBJ to be treated as variables.
-   Each arg can be a symbol or a list, where the first element is the 'variable'."
-  `(symbol-macrolet
-       ,(mapcar (lambda (x) (if (atom x)
-                                `(,x (gethash ,(make-keyword x) ,obj))
-                                `(,(pop x) (gethash ,(make-keyword (car x)) ,obj))))
-                args)
-     ,@body))
+  (defmacro with-args (args obj &body body)
+    "Wraps BODY with a symbol-macrolet, allowing each slot in OBJ to be treated as variables.
+     OBJ can be a symbol (the class is the obj name) or a list of the class and the obj
+     Each arg can be a symbol (the variable is the slot name or a list of the variable and slot."
+    (let* ((class (if (listp obj)
+                      (pop obj)
+                      obj))
+           (obj-var (if (listp obj)
+                        (car obj)
+                        obj))
+           (table (gethash class classes)))
+      `(symbol-macrolet
+           ,(mapcar (lambda (x) (if (atom x)
+                                    `(,x (svref ,obj-var ,(gethash x table)))
+                                    `(,(pop x) (svref ,obj-var ,(gethash (car x) table)))))
+             args)
+         ,@body))))
 
 ;;control constructs
 (defmacro do-step-max ((var step max) &body body)
