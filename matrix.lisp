@@ -37,9 +37,14 @@
     (defun matrix-multiply (matrix m2)
       "A specific matrix multiplication routine. MATRIX is square, 4 by 4
        Multiplies MATRIX with M2. Modifies M2 to hold the result. Returns M2."
+      (declare (optimize (speed 3) (safety 0)))
       (let ((array array)
+            (rows rows)
+            (cols cols)
+            (last-col2 (m-last-col m2))
             (array2 (m-array m2)))
-        (dotimes (col (m-last-col m2) m2)
+        (declare (type fixnum rows cols last-col2))
+        (dotimes (col last-col2 m2)
           (dotimes (i rows)
             (setf (svref temp i) (aref array2 i col)))
           (dotimes (row rows)
